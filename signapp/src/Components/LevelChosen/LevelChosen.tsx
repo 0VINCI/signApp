@@ -13,6 +13,7 @@ const LevelChosen = () => {
   return (
     <div className="app-container">
       <div className="app-header">
+        <img src='logo.webp'></img>
         <h1>Aplikacja do nauki języka migowego</h1>
         <h2>Wybierz poziom trudności</h2>
       </div>
