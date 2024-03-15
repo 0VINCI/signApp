@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import Button from '../Button/Button'; 
-import '../App/App.css'; // Upewnij się, że ścieżka do App.css jest poprawna
+import './LevelChosen.css';
 
 const LevelChosen = () => {
   const navigate = useNavigate();
