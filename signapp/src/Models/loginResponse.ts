@@ -1,0 +1,4 @@
+interface LoginResponse {
+    jwt: string;
+  }
+  

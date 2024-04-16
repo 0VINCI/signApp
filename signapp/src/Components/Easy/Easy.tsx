@@ -7,7 +7,7 @@ import { useNavigate } from 'react-router-dom';
 
 const Easy = () => {
   const [image, setImage] = useState('');
-  const [options, setOptions] = useState(['Pies', 'Kot', 'Twój stary']);
+  const [options, setOptions] = useState(['Pies', 'Kot', 'Mysz']);
   const [selectedOption, setSelectedOption] = useState('');
   const [isAnswerCorrect, setIsAnswerCorrect] = useState(false);
 

@@ -42,7 +42,7 @@ const Hard = () => {
     return () => stopVideoStream();
   }, []);
 
-  const wordToImitate = 'siusiak';
+  const wordToImitate = 'A';
 
   return (
     <div className="container my-5">
