@@ -1,4 +1,4 @@
 interface LoginResponse {
-    jwt: string;
+    token: string;
   }
   

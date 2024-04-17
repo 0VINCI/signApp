@@ -1,59 +1,74 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import 'bootstrap/dist/css/bootstrap.min.css';
 import { Card, Button, Row, Col, Alert } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
-
+import { getQuestion, checkAnswer } from '../../services/questionService';
+import { Question } from '../../Models/Question';
 
 const Easy = () => {
-  const [image, setImage] = useState('');
-  const [options, setOptions] = useState(['Pies', 'Kot', 'Mysz']);
+  const [currentQuestion, setCurrentQuestion] = useState<Question | null>(null);
   const [selectedOption, setSelectedOption] = useState('');
-  const [isAnswerCorrect, setIsAnswerCorrect] = useState(false);
-
-  const correctAnswer = 'Pies';
-  const imageUrl = "https://zoonews.pl/wp-content/uploads/2021/08/chihuahua-1.jpg";
+  const [isAnswerCorrect, setIsAnswerCorrect] = useState(null);
+  const [checkAnswerClicked, setCheckAnswerClicked] = useState(false);
+  const navigate = useNavigate();
+const [answerChecked, setAnswerChecked] = useState(false);
 
   useEffect(() => {
+    fetchQuestions(); 
+  }, []);
 
-    const fetchImage = async () => {
-      try {
-        const response = await axios.get('http://localhost:5196/api/Hero/image/2');
-        setImage(imageUrl); 
-      } catch (error) {
-        console.error('Error fetching image:', error);
+  const fetchQuestions = async () => {
+    try {
+      const questionData = await getQuestion('easy'); 
+      setCurrentQuestion(questionData);
+
+      if (questionData) {
+        setImage(questionData.url);
+        setOptions([questionData.response1, questionData.response2, questionData.response3]);
       }
-    };  const goToHomePage = () => {
-    navigate('/');
+    } catch (error) {
+      console.error('Błąd pobierania pytania:', error);
+    }
+  }
+
+  const handleCheckAnswer = async () => {
+    if (!selectedOption || !currentQuestion) {
+      console.error('Wybierz opcję.');
+      return;
+    }
+
+    try {
+      const isCorrect = await checkAnswer(currentQuestion.questionId.toString(), selectedOption);
+      setIsAnswerCorrect(isCorrect);
+      setAnswerChecked(true);
+
+      setSelectedOption('');
+      setIsAnswerCorrect(null);
+      setAnswerChecked(false);
+
+      fetchQuestions();
+  
+    } catch (error) {
+      console.error('Wystąpił błąd podczas sprawdzania pytania:', error);
+    }
   };
 
-
-    fetchImage();
-  }, []);
-  const navigate = useNavigate();
   const goToHomePage = () => {
-    navigate('/');
+    navigate('/levelchosen');
   };
 
   const goToNextQuestion = () => {
+    setSelectedOption('');
+    setIsAnswerCorrect(null);
+    setCheckAnswerClicked(false);
+    fetchQuestions();
+  };
 
-    const nextQuestionId = 3; // Przykładowy ID następnego pytania
-    navigate(`/question/${nextQuestionId}`);
-  };
-  
-  const handleOptionClick = (option :any) => {
-    setSelectedOption(option);
-    setIsAnswerCorrect(option === correctAnswer);
-  };
-  const [checkAnswer, setCheckAnswer] = useState(false);
+  const [image, setImage] = useState('');
+  const [options, setOptions] = useState<string[]>([]);
 
-  const handleCheckAnswer = () => {
-    setCheckAnswer(true);
-    setIsAnswerCorrect(selectedOption === correctAnswer);
-  };
 
   return (
-    <div className="container my-5">
+    <div className="app-container">
       <h2 className="text-center mb-4">Wybierz poprawną odpowiedź. Co przedstawia obrazek?</h2>
       <Row>
         <Col md={6} className="d-flex align-items-center justify-content-center">
@@ -77,7 +92,7 @@ const Easy = () => {
               Sprawdź odpowiedź
             </Button>
           </div>
-          {checkAnswer && (
+          {answerChecked && (
             <Alert variant={isAnswerCorrect ? 'success' : 'danger'} className="text-center mt-3">
               {isAnswerCorrect ? "Poprawna odpowiedź!" : "Niepoprawna odpowiedź, spróbuj ponownie."}
             </Alert>

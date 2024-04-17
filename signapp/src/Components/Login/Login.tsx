@@ -3,6 +3,8 @@ import React, { useState } from 'react';
 import { Form, Button, Container, Alert } from 'react-bootstrap';
 import { userLogin } from '../../services/loginService';
 import { useNavigate } from 'react-router-dom';
+import Logo from '../Logo/Logo';
+import './Login.css'
 
 const Login = () => {
   const [username, setUsername] = useState('');
@@ -18,20 +20,22 @@ const Login = () => {
       const data = await userLogin(user);
       navigate('/levelchosen');
 
-      Cookies.set('userToken', data.jwt, { expires: 7 }); // token wygaśnie po 7 dniach
-      
+      Cookies.set('userToken', data.token, { expires: 7 }); // token wygaśnie po 7 dniach
+
       // callback z tokenem, jeśli jest potrzebny w innym miejscu aplikacji
-      // onLoginSuccess(data.jwt);
+      // onLoginSuccess(data.token);
 
   } catch (error) {
     setError('Nie udało się zalogować. Sprawdź swoje dane logowania.');
   }
 };
 return (
-  <Container>
+  <div className="app-container">
     <h2>Logowanie</h2>
     {error && <Alert variant="danger">{error}</Alert>}
     <Form onSubmit={handleSubmit}>
+    <Logo />
+
         <Form.Group controlId="formBasicEmail">
           <Form.Label>Login</Form.Label>
           <Form.Control
@@ -52,11 +56,11 @@ return (
           />
         </Form.Group>
 
-        <Button variant="primary" type="submit">
+        <Button className="button-custom" variant="primary" type="submit">
           Zaloguj się
         </Button>
       </Form>
-    </Container>
+    </div>
   );
 };
 

@@ -12,3 +12,17 @@ try {
     throw error;
 }
 }
+
+export const checkAnswer = async (questionId: string, selectedOption: string) => {
+  try {
+    const response = await axios.post(`${apiUrl}/checkAnswer`, {
+      id: questionId,
+      answer: selectedOption,
+    });
+    return response.data.isCorrect;
+  } catch (error) {
+    console.error('Błąd podczas sprawdzania odpowiedzi', error);
+    throw error;
+  }
+};
+

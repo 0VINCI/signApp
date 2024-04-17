@@ -1,0 +1,7 @@
+.logo {
+    max-width: 300px;
+    transition: transform 1s; /* animacja */
+  }
+    .logo-small {
+    transform: scale(0.5); 
+  }
