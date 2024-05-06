@@ -1,9 +1,9 @@
 import { configureStore, combineReducers } from '@reduxjs/toolkit'
-import { scoreBoardSlice } from '../slice/scoreBoardSlice'
+import { temporaryScoreSlice } from '../slice/temporaryScoreSlice'
 
 const store = configureStore({
     reducer: combineReducers({
-        scoreBoard: scoreBoardSlice.reducer
+        temporaryScore: temporaryScoreSlice.reducer
     })
 })
 

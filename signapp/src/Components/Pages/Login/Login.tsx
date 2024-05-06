@@ -1,16 +1,21 @@
 import Cookies from 'js-cookie';
 import React, { useState } from 'react';
 import { Form, Button, Container, Alert } from 'react-bootstrap';
-import { userLogin } from '../../services/loginService';
+import { userLogin } from '../../../services/loginService';
 import { useNavigate } from 'react-router-dom';
-import Logo from '../Logo/Logo';
+import Logo from '../../Logo/Logo';
 import './Login.css'
+import { useDispatch } from 'react-redux';
+import { updateUserId } from '../../../slice/temporaryScoreSlice';
+
 
 const Login = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const handleSubmit = async (event: any) => {
     event.preventDefault();
@@ -18,24 +23,20 @@ const Login = () => {
     try {
       const user = { login: username, password };
       const data = await userLogin(user);
+      if (data.userId) {
+        dispatch(updateUserId(data.userId));
+      }
       navigate('/levelchosen');
-
-      Cookies.set('userToken', data.token, { expires: 7 }); // token wygaśnie po 7 dniach
-
-      // callback z tokenem, jeśli jest potrzebny w innym miejscu aplikacji
-      // onLoginSuccess(data.token);
-
-  } catch (error) {
-    setError('Nie udało się zalogować. Sprawdź swoje dane logowania.');
-  }
-};
+    } catch (error) {
+      setError('Nie udało się zalogować. Sprawdź swoje dane logowania.');
+    }
+  };
 return (
   <div className="app-container">
     <h2>Logowanie</h2>
     {error && <Alert variant="danger">{error}</Alert>}
     <Form onSubmit={handleSubmit}>
     <Logo />
-
         <Form.Group controlId="formBasicEmail">
           <Form.Label>Login</Form.Label>
           <Form.Control

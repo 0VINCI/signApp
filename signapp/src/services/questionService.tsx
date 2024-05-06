@@ -1,9 +1,10 @@
 import axios from 'axios';
 import { Question } from '../Models/Question';
+import { CheckAnswer } from '../Models/checkAnswer';
 
 const apiUrl = process.env.REACT_APP_API_URL;
 
-export const getQuestion = async (level: string): Promise<Question> => {
+export const getQuestion = async (level: number): Promise<Question> => {
 try {
     const response = await axios.get(`${apiUrl}/getQuestion/${level}`);
     return response.data;
@@ -13,16 +14,12 @@ try {
 }
 }
 
-export const checkAnswer = async (questionId: string, selectedOption: string) => {
+export const checkAnswer = async (checkAnswer: CheckAnswer) => {
   try {
-    const response = await axios.post(`${apiUrl}/checkAnswer`, {
-      id: questionId,
-      answer: selectedOption,
-    });
+    const response = await axios.post(`${apiUrl}/checkAnswer`, checkAnswer);
     return response.data.isCorrect;
   } catch (error) {
     console.error('Błąd podczas sprawdzania odpowiedzi', error);
     throw error;
   }
 };
-

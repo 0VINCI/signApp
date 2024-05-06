@@ -1,9 +1,11 @@
-export interface ScoreBoard {
+export interface HighScoreEntry {
     login: string;
-    highScoreEasy_Correct: number;
-    highScoreEasy_All: number;
-    highScoreMedium_Correct: number;
-    highScoreMedium_All: number;
-    highScoreHard_Correct: number;
-    highScoreHard_All: number;
+    correctAnswers: number;
+    totalAnswers: number;
+}
+
+export interface ScoreBoard {
+    easy: HighScoreEntry[];
+    medium: HighScoreEntry[];
+    hard: HighScoreEntry[];
 }

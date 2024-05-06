@@ -5,5 +5,4 @@ export interface Question {
     response1: string;
     response2: string;
     response3: string;
-    correctAnswer: string;
 }
