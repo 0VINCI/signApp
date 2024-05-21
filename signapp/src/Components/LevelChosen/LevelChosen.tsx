@@ -17,7 +17,8 @@ const LevelChosen = () => {
   };
 
   const handleLogoutButtonClick = () => {
-    logout()
+    logout();
+    navigate('/');
   };
 
   return (
@@ -27,14 +28,15 @@ const LevelChosen = () => {
         <h1>Aplikacja do nauki języka migowego</h1>
         <h2>Wybierz poziom trudności</h2>
       </div>
-      <div>
+      <div className="button-container">
         <Button className="button-custom" onClick={() => handleLevelButtonClick('easy')}>Łatwy</Button>
         <Button className="button-custom" onClick={() => handleLevelButtonClick('medium')}>Średni</Button>
         <Button className="button-custom" onClick={() => handleLevelButtonClick('hard')}>Trudny</Button>
       </div>
-      <Button className="button-custom" onClick={() => handleRankingButtonClick()}>Ranking</Button>
-      <Button className="button-custom" onClick={() => handleLogoutButtonClick()}>Wyloguj się</Button>
-
+      <div className="additional-buttons">
+        <Button className="button-custom" onClick={() => handleRankingButtonClick()}>Ranking</Button>
+        <Button className="button-custom" onClick={() => handleLogoutButtonClick()}>Wyloguj się</Button>
+      </div>
     </div>
   );
 };

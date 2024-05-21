@@ -14,7 +14,9 @@ export const sendTemporaryScore = createAsyncThunk(
         const { userId, data } = state.temporaryScore; 
 
         try {
-            const response = await axios.post(`${apiUrl}/sendTemporaryScore`, { userId, data });
+            const response = await axios.post(`${apiUrl}/sendTemporaryScore`, { userId, data },{
+                withCredentials: true
+              });
             if (response.status !== 200) {
                 thunkApi.dispatch(clearData());
                 return thunkApi.rejectWithValue({

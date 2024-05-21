@@ -18,7 +18,14 @@ function App() {
         <Route path="/easy" element={<PrivateRoute><Easy /></PrivateRoute>} />
         <Route path="/medium" element={<PrivateRoute><Medium /></PrivateRoute>} />
         <Route path="/hard" element={<PrivateRoute><Hard /></PrivateRoute>} />
-        <Route path="/ranking" element={<PrivateRoute><HighScores /></PrivateRoute>} />
+  <Route path="/ranking" element={<PrivateRoute><HighScores /></PrivateRoute>} />
+    {/*      <Route path="/" element={<Login />} />
+          <Route path="/levelchosen" element={<LevelChosen />}/>
+        <Route path="/easy" element={<Easy />} />
+        <Route path="/medium" element={<Medium />} />
+        <Route path="/hard" element={<Hard />} />
+        <Route path="/ranking" element={<HighScores />} />
+  */}
       </Routes>
     </BrowserRouter>
   );

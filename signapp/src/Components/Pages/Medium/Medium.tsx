@@ -23,7 +23,7 @@ const startVideo = async () => {
 };
 const navigate = useNavigate();
 const goToHomePage = () => {
-  navigate('/');
+  navigate('/levelchosen');
 };
 
 

@@ -1,13 +1,13 @@
-import Cookies from 'js-cookie';
 import React, { useState } from 'react';
-import { Form, Button, Container, Alert } from 'react-bootstrap';
+import { Form, Container, Alert } from 'react-bootstrap';
 import { userLogin } from '../../../services/loginService';
 import { useNavigate } from 'react-router-dom';
 import Logo from '../../Logo/Logo';
 import './Login.css'
 import { useDispatch } from 'react-redux';
 import { updateUserId } from '../../../slice/temporaryScoreSlice';
-
+import Button from '../../Button/Button';
+import { logout } from '../../PrivateRoute/helpers/logout';
 
 const Login = () => {
   const [username, setUsername] = useState('');
@@ -17,26 +17,31 @@ const Login = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  const handleSubmit = async (event: any) => {
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    
+    logout()
     try {
       const user = { login: username, password };
       const data = await userLogin(user);
+      
       if (data.userId) {
         dispatch(updateUserId(data.userId));
+        setError('');
+        navigate('/levelchosen');
+      } else if (data.error) {
+        setError(data.error);
       }
-      navigate('/levelchosen');
     } catch (error) {
       setError('Nie udało się zalogować. Sprawdź swoje dane logowania.');
     }
   };
-return (
-  <div className="app-container">
-    <h2>Logowanie</h2>
-    {error && <Alert variant="danger">{error}</Alert>}
-    <Form onSubmit={handleSubmit}>
-    <Logo />
+
+  return (
+    <div className="app-container">
+      <h2>Logowanie</h2>
+      {error && <Alert variant="danger">{error}</Alert>}
+      <Form onSubmit={handleSubmit}>
+        <Logo />
         <Form.Group controlId="formBasicEmail">
           <Form.Label>Login</Form.Label>
           <Form.Control
@@ -57,7 +62,13 @@ return (
           />
         </Form.Group>
 
-        <Button className="button-custom" variant="primary" type="submit">
+        <Button 
+          className="button-custom" 
+          onClick={() => {
+            const fakeEvent = { preventDefault: () => {} } as React.FormEvent<HTMLFormElement>;
+            handleSubmit(fakeEvent);
+          }}
+        >
           Zaloguj się
         </Button>
       </Form>

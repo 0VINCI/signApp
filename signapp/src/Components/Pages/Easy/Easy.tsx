@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { incrementAllAnswer, incrementCorrectandAllAnswer } from '../../../slice/temporaryScoreSlice';
 import { Level } from '../../../Models/Level';
-import { getQuestion, checkAnswer } from '../../../services/questionService';
+import { checkAnswer, easyQuestion } from '../../../services/questionService';
 import { Question } from '../../../Models/Question';
 import { sendTemporaryScore } from '../../../services/temporaryScoreService';
 import type { AppDispatch } from '../../../store/index';
@@ -25,7 +25,7 @@ const Easy = () => {
   }, []);
 
   async function fetchQuestion() {
-    const data = await getQuestion(Level.Easy);
+    const data = await easyQuestion();
     setQuestion(data);
     setAlertVisible(false);
   }
@@ -55,7 +55,7 @@ const Easy = () => {
   };
 
   const goToHomePage = () => {
-    navigate('/');
+    navigate('/levelchosen');
   };
 
   const saveAndBackHandler = () => {

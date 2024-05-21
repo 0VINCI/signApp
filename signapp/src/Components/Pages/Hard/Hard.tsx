@@ -1,68 +1,89 @@
-import React, { useRef, useEffect, useState } from 'react';
-import * as tf from '@tensorflow/tfjs';
-import axios from 'axios';
-import { Button, Col, Row } from 'react-bootstrap';
+import React, { useEffect, useRef, useState } from 'react';
+import { Hands, HAND_CONNECTIONS } from '@mediapipe/hands';
+import { Camera } from '@mediapipe/camera_utils';
+import { drawConnectors, drawLandmarks } from '@mediapipe/drawing_utils';
+import HandTrackingComponent from '../../Camera/Camera';
+import { Row, Col, Button } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
+import { Level } from '../../../Models/Level';
+import { cameraQuestion } from '../../../services/questionService';
+import { CameraQuestion } from '../../../Models/CameraQuestion';
 
 const Hard = () => {
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const [stream, setStream] = useState<MediaStream | null>(null);
+    const videoRef = useRef<HTMLVideoElement>(null);
+    const canvasRef = useRef<HTMLCanvasElement>(null);
+    const navigate = useNavigate();
+    const [question, setQuestion] = useState<CameraQuestion | null>(null);
 
-  const navigate = useNavigate();
+    useEffect(() => {
+        const videoElement = videoRef.current;
+        const canvasElement = canvasRef.current;
 
-  const stopVideoStream = () => {
-    // Bezpośrednie użycie refa video do zatrzymania strumienia
-    if (videoRef.current && videoRef.current.srcObject) {
-      const mediaStream = videoRef.current.srcObject as MediaStream;
-      mediaStream.getTracks().forEach((track) => track.stop());
-      // Ustawienie srcObject na null, aby w pełni uwolnić zasoby kamery
-      videoRef.current.srcObject = null;
-    }
-  };
+        if (!videoElement || !canvasElement) {
+            console.error("Required elements (video or canvas) are not available.");
+            return;
+        }
 
-  const startVideo = async () => {
-    try {
-      const mediaStream = await navigator.mediaDevices.getUserMedia({ video: true });
-      if (videoRef.current) {
-        videoRef.current.srcObject = mediaStream;
-        setStream(mediaStream); 
-      }
-    } catch (error) {
-      console.error('Error accessing the webcam', error);
-    }
-  };
+        const canvasCtx = canvasElement.getContext('2d');
+        if (!canvasCtx) {
+            console.error("Cannot obtain 2D context from the canvas element.");
+            return;
+        }
 
-  const goToHomePage = () => {
-    stopVideoStream();
-    navigate('/');
+        const hands = new Hands({
+            locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`,
+        });
+
+        hands.setOptions({
+            maxNumHands: 1,
+            modelComplexity: 1,
+            minDetectionConfidence: 0.5,
+            minTrackingConfidence: 0.5
+        });
+
+        hands.onResults((results) => {
+            if (canvasCtx) {
+                canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
+                results.multiHandLandmarks.forEach(landmarks => {
+                    drawConnectors(canvasCtx, landmarks, HAND_CONNECTIONS, { color: '#00FF00', lineWidth: 5 });
+                    drawLandmarks(canvasCtx, landmarks, { color: '#FF0000', lineWidth: 2 });
+                });
+            }
+        });
+
+        const camera = new Camera(videoElement, {
+            onFrame: async () => {
+                await hands.send({ image: videoElement });
+            },
+            width: 640,
+            height: 480
+        });
+        camera.start();
+
+        return () => {
+            camera.stop();
+            hands.close();
+        };
+    }, []);
+    const goToHomePage = () => {
+      navigate('/');
   };
 
   useEffect(() => {
-    startVideo();
-    return () => stopVideoStream();
+    fetchQuestion();
+    
   }, []);
 
-  const wordToImitate = 'A';
+  async function fetchQuestion() {
+    const data = await cameraQuestion(Level.Hard);
+    setQuestion(data);
+  }
+  const wordToImitate = question?.questionContent;
 
-  return (
+    return (
+  
     <div className="container my-5">
-      <h1 className="text-center mb-4">Naśladuj to słowo</h1>
-      <h2 className="text-center mb-4">{wordToImitate}</h2>
-      <Row className="justify-content-md-center mb-4">
-        <Col md={6} className="d-flex justify-content-center">
-          <video ref={videoRef} autoPlay playsInline muted className="w-100" />
-        </Col>
-      </Row>
-      <Row className="text-center">
-        <Col>
-          <Button variant="secondary" className="mx-2" onClick={goToHomePage}>
-            Strona główna
-          </Button>
-          <Button variant="success" className="mx-2">
-            Następne pytanie
-          </Button>
-        </Col>
-      </Row>
+            <HandTrackingComponent />
     </div>
   );
 };

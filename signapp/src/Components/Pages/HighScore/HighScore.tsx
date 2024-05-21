@@ -1,7 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { Table } from 'react-bootstrap';
+import { Table, Container } from 'react-bootstrap';
 import { getScoreBoard } from '../../../services/scoreBoardService';
 import { ScoreBoard } from '../../../Models/ScoreBoard';
+import Logo from '../../Logo/Logo';
+import './HighScore.css';
+import Button from '../../Button/Button';
+import { useNavigate } from 'react-router-dom';
 
 const HighScores = () => {
     const [scores, setScores] = useState<ScoreBoard>({ easy: [], medium: [], hard: [] });
@@ -19,15 +23,20 @@ const HighScores = () => {
         fetchScores();
     }, []);
 
+    const navigate = useNavigate();
+    const goToHomePage = () => {
+        navigate('/levelchosen');
+      };
+      
     const renderScoreTable = (levelScores: any[]) => (
-        <Table striped bordered hover size="sm">
+        <Table striped bordered hover size="sm" className="score-table">
             <thead>
                 <tr>
                     <th>#</th>
-                    <th>Login</th>
-                    <th>Correct Answers</th>
-                    <th>Total Answers</th>
-                    <th>Accuracy</th>
+                    <th>Użytkownik</th>
+                    <th>Liczba poprawnych odpowiedzi</th>
+                    <th>Liczba wszystkich odpowiedzi</th>
+                    <th>Dokładność</th>
                 </tr>
             </thead>
             <tbody>
@@ -45,15 +54,23 @@ const HighScores = () => {
     );
 
     return (
-        <div>
-            <h1>High Scores</h1>
-            <h2>Easy Level</h2>
-            {renderScoreTable(scores.easy)}
-            <h2>Medium Level</h2>
-            {renderScoreTable(scores.medium)}
-            <h2>Hard Level</h2>
-            {renderScoreTable(scores.hard)}
-        </div>
+        <Container className="high-scores-container">
+            <Logo />
+            <h1>Tabela wyników</h1>
+            <div className="level-section">
+                <h2>Poziom łatwy</h2>
+                {renderScoreTable(scores.easy)}
+            </div>
+            <div className="level-section">
+                <h2>Poziom średni</h2>
+                {renderScoreTable(scores.medium)}
+            </div>
+            <div className="level-section">
+                <h2>Poziom trudny</h2>
+                {renderScoreTable(scores.hard)}
+            </div>
+          <Button className="button-custom" onClick={() => goToHomePage()}>Powrót do strony głównej</Button>
+        </Container>
     );
 };
 

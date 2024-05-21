@@ -6,8 +6,8 @@ interface PrivateRouteProps {
   children: ReactNode;
 }
 
-const PrivateRoute = ({ children }: PrivateRouteProps) => {
-  return isAuthenticated() ? children : <Navigate to="/" />;
+const PrivateRoute = ({ children }: PrivateRouteProps): JSX.Element => {
+  return isAuthenticated() ? <>{children}</> : <Navigate to="/" />;
 };
 
 export default PrivateRoute;

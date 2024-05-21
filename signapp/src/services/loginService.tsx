@@ -5,8 +5,10 @@ const apiUrl = process.env.REACT_APP_API_URL;
 
 export const userLogin = async (user: User): Promise<{ userId?: string, error?: string }> => {
   try {
-    const response = await axios.post(`${apiUrl}/login`, user);
-    if (response.status === 200) {
+    const response = await axios.post(`${apiUrl}/login`, user, {
+      withCredentials: true
+    });
+    if (response.status === 200 && response.data.userId) {
       return { userId: response.data.userId };
     } else {
       // Jeśli odpowiedź jest 200 ale brak userId lub inne statusy 2XX
