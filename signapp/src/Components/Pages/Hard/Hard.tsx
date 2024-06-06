@@ -1,89 +1,115 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { Hands, HAND_CONNECTIONS } from '@mediapipe/hands';
-import { Camera } from '@mediapipe/camera_utils';
-import { drawConnectors, drawLandmarks } from '@mediapipe/drawing_utils';
-import HandTrackingComponent from '../../Camera/Camera';
-import { Row, Col, Button } from 'react-bootstrap';
+import React, { useState, useEffect, useRef } from 'react';
+import { Button, Row, Col, Alert } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
+import HandTrackingComponent from '../../Camera/Camera';
+import { Question } from '../../../Models/Question';
+import { getQuestion } from '../../../services/questionService';
 import { Level } from '../../../Models/Level';
-import { cameraQuestion } from '../../../services/questionService';
-import { CameraQuestion } from '../../../Models/CameraQuestion';
+import { useDispatch } from 'react-redux';
+import { AppDispatch } from '../../../store';
+import { sendTemporaryScore } from '../../../services/temporaryScoreService';
+import { incrementAllAnswer, incrementCorrectandAllAnswer } from '../../../slice/temporaryScoreSlice';
 
 const Hard = () => {
-    const videoRef = useRef<HTMLVideoElement>(null);
-    const canvasRef = useRef<HTMLCanvasElement>(null);
-    const navigate = useNavigate();
-    const [question, setQuestion] = useState<CameraQuestion | null>(null);
+  const [question, setQuestion] = useState<Question | null>(null);
+  const [predictions, setPredictions] = useState<string[]>([]);
+  const [isCorrect, setIsCorrect] = useState<boolean>(false);
+  const [message, setMessage] = useState<string>('');
+  const [showMotivation, setShowMotivation] = useState<boolean>(false);
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const isAnswerCorrectRef = useRef<boolean>(false);
 
-    useEffect(() => {
-        const videoElement = videoRef.current;
-        const canvasElement = canvasRef.current;
+  const navigate = useNavigate();
+  const dispatch = useDispatch<AppDispatch>();
 
-        if (!videoElement || !canvasElement) {
-            console.error("Required elements (video or canvas) are not available.");
-            return;
-        }
+  const goToHomePage = () => {
+    navigate('/levelchosen');
+  };
 
-        const canvasCtx = canvasElement.getContext('2d');
-        if (!canvasCtx) {
-            console.error("Cannot obtain 2D context from the canvas element.");
-            return;
-        }
-
-        const hands = new Hands({
-            locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`,
-        });
-
-        hands.setOptions({
-            maxNumHands: 1,
-            modelComplexity: 1,
-            minDetectionConfidence: 0.5,
-            minTrackingConfidence: 0.5
-        });
-
-        hands.onResults((results) => {
-            if (canvasCtx) {
-                canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
-                results.multiHandLandmarks.forEach(landmarks => {
-                    drawConnectors(canvasCtx, landmarks, HAND_CONNECTIONS, { color: '#00FF00', lineWidth: 5 });
-                    drawLandmarks(canvasCtx, landmarks, { color: '#FF0000', lineWidth: 2 });
-                });
-            }
-        });
-
-        const camera = new Camera(videoElement, {
-            onFrame: async () => {
-                await hands.send({ image: videoElement });
-            },
-            width: 640,
-            height: 480
-        });
-        camera.start();
-
-        return () => {
-            camera.stop();
-            hands.close();
-        };
-    }, []);
-    const goToHomePage = () => {
-      navigate('/');
+  const fetchQuestion = async () => {
+    const data = await getQuestion(Level.Hard);
+    setQuestion(data);
+    setPredictions([]);
+    setIsCorrect(false);
+    setMessage('');
+    setShowMotivation(false);
+    isAnswerCorrectRef.current = false;
+    clearTimeout(timerRef.current!);
+    startMotivationTimer();
   };
 
   useEffect(() => {
     fetchQuestion();
-    
   }, []);
 
-  async function fetchQuestion() {
-    const data = await cameraQuestion(Level.Hard);
-    setQuestion(data);
-  }
-  const wordToImitate = question?.questionContent;
+  const handlePrediction = (prediction: string) => {
+    if (!isAnswerCorrectRef.current) {
+      setPredictions((prev) => [...prev, prediction]);
+    }
+  };
 
-    return (
-  
+  useEffect(() => {
+    if (predictions.length >= 3) {
+      const lastThree = predictions.slice(-3);
+      const isConsistent = lastThree.every(pred => pred === lastThree[0]);
+      if (isConsistent && question && lastThree[0].toLowerCase() === question.response1.toLowerCase()) {
+        setIsCorrect(true);
+        setMessage('Poprawna odpowiedź!');
+        isAnswerCorrectRef.current = true;
+        clearTimeout(timerRef.current!);
+        dispatch(incrementCorrectandAllAnswer({ levelId: Level.Hard }));
+      }
+    }
+  }, [predictions, question]);
+
+  const startMotivationTimer = () => {
+    timerRef.current = setTimeout(() => {
+      if (!isAnswerCorrectRef.current) {
+        setShowMotivation(true);
+        setMessage('Nie poddawaj się!');
+        setTimeout(() => {
+          setShowMotivation(false);
+          setMessage('');
+          if (!isAnswerCorrectRef.current) {
+            startMotivationTimer();
+          }
+        }, 2000); 
+      }
+    }, 5000); 
+  };
+
+  const saveAndBackHandler = () => {
+    dispatch(sendTemporaryScore());
+    goToHomePage();
+  };
+
+  useEffect(() => {
+    return () => clearTimeout(timerRef.current!);
+  }, []);
+
+  return (
     <div className="container my-5">
-            <HandTrackingComponent />
+      <h2 className="text-center mb-4">{question?.questionContent} {question?.response1}</h2>
+      <Row>
+        <Col md={12} className="d-flex justify-content-center">
+          <HandTrackingComponent width={640} height={480} onPrediction={handlePrediction} />
+        </Col>
+      </Row>
+      {message && (
+        <Alert variant={isCorrect ? 'success' : showMotivation ? 'info' : 'secondary'} className="mt-4">
+          {message}
+        </Alert>
+      )}
+      <Row className="text-center mt-4">
+        <Col>
+          <Button variant="secondary" onClick={saveAndBackHandler} className="mx-2">
+            Zapisz i wróć do strony głównej
+          </Button>
+          <Button variant="success" className="mx-2" disabled={!isCorrect} onClick={fetchQuestion}>
+            Następne pytanie
+          </Button>
+        </Col>
+      </Row>
     </div>
   );
 };

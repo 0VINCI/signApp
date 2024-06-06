@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { incrementAllAnswer, incrementCorrectandAllAnswer } from '../../../slice/temporaryScoreSlice';
 import { Level } from '../../../Models/Level';
-import { checkAnswer, easyQuestion } from '../../../services/questionService';
+import { checkAnswer, getQuestion } from '../../../services/questionService';
 import { Question } from '../../../Models/Question';
 import { sendTemporaryScore } from '../../../services/temporaryScoreService';
 import type { AppDispatch } from '../../../store/index';
@@ -25,9 +25,11 @@ const Easy = () => {
   }, []);
 
   async function fetchQuestion() {
-    const data = await easyQuestion();
+    const data = await getQuestion(Level.Easy);
     setQuestion(data);
+    setSelectedOption('');
     setAlertVisible(false);
+    setIsAnswerCorrect(false); 
   }
 
   const handleOptionClick = (option: string) => {
@@ -41,17 +43,14 @@ const Easy = () => {
 
     const result = await checkAnswer({
       questionId: question.questionId,
-      levelId: Level.Easy,
       selectedOption: selectedOption
   });
-      setIsAnswerCorrect(result);
-    setCheckAnswerClicked(true);
-    setAlertVisible(true); 
-    dispatch(result ? incrementCorrectandAllAnswer({ levelId: Level.Easy }) : incrementAllAnswer({ levelId: Level.Easy }));
 
-    setTimeout(() => {
-      setAlertVisible(false);
-    }, 3000);
+  setCheckAnswerClicked(true);
+    setAlertVisible(true); 
+    dispatch(result.correctAnswer ? incrementCorrectandAllAnswer({ levelId: Level.Easy }) : incrementAllAnswer({ levelId: Level.Easy }));
+    setIsAnswerCorrect(result.correctAnswer);
+
   };
 
   const goToHomePage = () => {
@@ -59,7 +58,6 @@ const Easy = () => {
   };
 
   const saveAndBackHandler = () => {
-    
     dispatch(sendTemporaryScore());
     goToHomePage();
   }
