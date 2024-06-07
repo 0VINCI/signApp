@@ -23,7 +23,7 @@
 .app-header h2 {
   font-size: 1.5rem;
   color: #555;
-  margin: 10px 0;
+  margin: 0;
 }
 
 .button-container {
@@ -58,15 +58,11 @@
 }
 
 @media (min-width: 768px) {
-  .button-container {
+  .button-container, .additional-buttons {
     flex-direction: row;
   }
 
-  .additional-buttons {
-    flex-direction: row;
-  }
-
-  .button-custom {
+  .button-container .button-custom, .additional-buttons .button-custom {
     width: auto;
   }
 }

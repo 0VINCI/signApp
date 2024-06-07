@@ -14,8 +14,8 @@ const initialState: TemporaryScoreState = {
     userId: -1,
     data: {
         levelId: -1,
-        correctAnswer: 0,
-        allAnswer: 0
+        correctAnswers: 0,
+        allAnswers: 0
     },
     isLoading: false,
     sendError: null
@@ -30,18 +30,18 @@ export const temporaryScoreSlice = createSlice({
         },
         incrementCorrectandAllAnswer: (state, action) => {
             state.data.levelId = action.payload.levelId;
-            state.data.correctAnswer += 1;
-            state.data.allAnswer += 1;
+            state.data.correctAnswers += 1;
+            state.data.allAnswers += 1;
         },
         incrementAllAnswer: (state, action) => {
             state.data.levelId = action.payload.levelId;
-            state.data.allAnswer += 1;
+            state.data.allAnswers += 1;
         },
         clearData: (state) => {
             state.data = {
                 levelId: -1,
-                correctAnswer: 0,
-                allAnswer: 0
+                correctAnswers: 0,
+                allAnswers: 0
             };
         },
         clearAll: () => {

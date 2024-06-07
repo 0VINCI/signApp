@@ -1,5 +1,5 @@
 export interface TemporaryScore {
     levelId: number,
-    correctAnswer: number,
-    allAnswer: number
+    correctAnswers: number,
+    allAnswers: number
 };

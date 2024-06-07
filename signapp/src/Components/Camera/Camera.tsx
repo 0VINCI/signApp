@@ -89,7 +89,7 @@ const HandTrackingComponent: React.FC<CameraProps> = ({ width, height, onPredict
           }
         }
       }
-    }, 1000); // 1 second interval
+    }, 500);
 
     return () => clearInterval(interval);
   }, [onPrediction]);
